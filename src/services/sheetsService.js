@@ -25,6 +25,7 @@ const HEADER_MAP = {
   adminId: 'Admin ID',
   createdAt: 'Yaratilgan sana',
   updatedAt: 'Yangilangan sana',
+  photoUrl: 'Rasm manzili',
 };
 
 const HEADERS = Object.values(HEADER_MAP);
@@ -110,6 +111,7 @@ async function addApplication(data) {
     adminId: '',
     createdAt: now,
     updatedAt: now,
+    photoUrl: data.photoUrl || '',
   };
   const row = {};
   for (const [key, header] of Object.entries(HEADER_MAP)) {
@@ -137,6 +139,14 @@ async function updateApplication(id, fields) {
     const header = HEADER_MAP[key];
     if (header) row.set(header, value);
   });
+  // google-spreadsheet qatorni saqlaganda uni to'liq qayta yozadi, lekin
+  // =IMAGE(...) formulasining o'qilgan qiymati doim bo'sh bo'ladi - shuning
+  // uchun formulani har safar saqlashdan oldin manzildan qayta tiklaymiz,
+  // aks holda rasm o'chib qoladi.
+  const photoUrl = row.get(HEADER_MAP.photoUrl);
+  if (photoUrl) {
+    row.set(HEADER_MAP.photoPreview, `=IMAGE("${photoUrl}")`);
+  }
   row.set(HEADER_MAP.updatedAt, formatDate(new Date()));
   await row.save();
   return rowToObject(row);
