@@ -20,10 +20,14 @@ async function sendPendingApplications(ctx) {
       Markup.button.callback('❌ Rad etish', `reject_${row.id}`),
     ]);
     if (row.photoFileId) {
-      await ctx.replyWithPhoto(row.photoFileId, { caption, ...keyboard });
-    } else {
-      await ctx.reply(caption, keyboard);
+      try {
+        await ctx.replyWithPhoto(row.photoFileId, { caption, ...keyboard });
+        continue;
+      } catch (err) {
+        console.error(`Rasmni yuborib bo'lmadi (ariza ${row.id}):`, err.message);
+      }
     }
+    await ctx.reply(caption, keyboard);
   }
 }
 

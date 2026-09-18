@@ -7,6 +7,12 @@ const BUTTONS = {
   END_CHAT: '🚫 Suhbatni tugatish',
 };
 
+const ADMIN_BUTTONS = {
+  PENDING: '📋 Kutilayotgan arizalar',
+  REPORTS: '📊 Hisobotlar',
+  ADD_ADMIN: "➕ Admin qo'shish",
+};
+
 const mainMenu = Markup.keyboard([
   [BUTTONS.REGISTER],
   [BUTTONS.RESET],
@@ -15,4 +21,10 @@ const mainMenu = Markup.keyboard([
 
 const chatModeKeyboard = Markup.keyboard([[BUTTONS.END_CHAT]]).resize();
 
-module.exports = { BUTTONS, mainMenu, chatModeKeyboard };
+const adminMenu = Markup.keyboard([
+  [ADMIN_BUTTONS.PENDING],
+  [ADMIN_BUTTONS.REPORTS],
+  [ADMIN_BUTTONS.ADD_ADMIN],
+]).resize();
+
+module.exports = { BUTTONS, ADMIN_BUTTONS, mainMenu, chatModeKeyboard, adminMenu };

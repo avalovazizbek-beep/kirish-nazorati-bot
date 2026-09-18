@@ -1,7 +1,9 @@
 const config = require('../config');
+const { getExtraAdminIds } = require('../services/adminStore');
 
 function isAdminId(id) {
-  return config.adminIds.includes(Number(id));
+  const numId = Number(id);
+  return config.adminIds.includes(numId) || getExtraAdminIds().includes(numId);
 }
 
 async function isAdmin(ctx, next) {

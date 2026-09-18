@@ -3,7 +3,7 @@ const LocalSession = require('telegraf-session-local');
 
 const config = require('./config');
 const { isAdmin, isAdminId } = require('./middlewares/isAdmin');
-const { BUTTONS, mainMenu } = require('./keyboards/mainMenu');
+const { BUTTONS, ADMIN_BUTTONS, mainMenu, adminMenu } = require('./keyboards/mainMenu');
 const { sendPendingApplications } = require('./handlers/pending');
 const {
   startUserChat,
@@ -16,13 +16,20 @@ const registerScene = require('./scenes/registerScene');
 const resetScene = require('./scenes/resetScene');
 const adminApproveScene = require('./scenes/adminApproveScene');
 const adminRejectScene = require('./scenes/adminRejectScene');
+const addAdminScene = require('./scenes/addAdminScene');
 
 const bot = new Telegraf(config.botToken);
 
 const localSession = new LocalSession({ database: 'sessions.json' });
 bot.use(localSession.middleware());
 
-const stage = new Scenes.Stage([registerScene, resetScene, adminApproveScene, adminRejectScene]);
+const stage = new Scenes.Stage([
+  registerScene,
+  resetScene,
+  adminApproveScene,
+  adminRejectScene,
+  addAdminScene,
+]);
 bot.use(stage.middleware());
 
 bot.start(async (ctx) => {
@@ -31,7 +38,8 @@ bot.start(async (ctx) => {
     await ctx.reply(
       'Salom, Admin!\n\n' +
         "Foydalanuvchilardan kelgan ro'yxatdan o'tish va parol tiklash arizalari sizga shu yerga avtomatik keladi.\n\n" +
-        '/pending - kutilayotgan arizalar ro\'yxati'
+        '/pending - kutilayotgan arizalar ro\'yxati',
+      adminMenu
     );
     return;
   }
@@ -49,6 +57,14 @@ bot.hears(BUTTONS.CONTACT_ADMIN, (ctx) => startUserChat(ctx));
 bot.hears(BUTTONS.END_CHAT, (ctx) => endUserChat(ctx, mainMenu));
 
 bot.command('pending', isAdmin, (ctx) => sendPendingApplications(ctx));
+bot.hears(ADMIN_BUTTONS.PENDING, isAdmin, (ctx) => sendPendingApplications(ctx));
+
+bot.hears(ADMIN_BUTTONS.REPORTS, isAdmin, async (ctx) => {
+  const link = `https://docs.google.com/spreadsheets/d/${config.googleSheetId}/edit`;
+  await ctx.reply(`📊 Barcha arizalar va foydalanuvchilar ma'lumotlari shu jadvalda:\n${link}`);
+});
+
+bot.hears(ADMIN_BUTTONS.ADD_ADMIN, isAdmin, (ctx) => ctx.scene.enter('add-admin-scene'));
 
 bot.command('stopreply', isAdmin, async (ctx) => {
   ctx.session.replyTo = null;
