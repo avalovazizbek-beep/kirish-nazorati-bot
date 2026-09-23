@@ -18,7 +18,7 @@ const registerScene = new Scenes.WizardScene(
     return ctx.wizard.next();
   },
 
-  // 1: raqamni qabul qilish -> ism familiya so'rash
+  // 1: raqamni qabul qilish -> familiya so'rash
   async (ctx) => {
     const contact = ctx.message && ctx.message.contact;
     if (!contact) {
@@ -30,23 +30,36 @@ const registerScene = new Scenes.WizardScene(
       return;
     }
     ctx.wizard.state.data.phone = contact.phone_number;
-    await ctx.reply('Ism va familiyangizni kiriting (masalan: Aziz Valiyev):', Markup.removeKeyboard());
+    await ctx.reply('Familiyangizni kiriting (masalan: Valiyev):', Markup.removeKeyboard());
     return ctx.wizard.next();
   },
 
-  // 2: ism familiya -> fakultet so'rash
+  // 2: familiya -> ism so'rash
   async (ctx) => {
     const text = ctx.message && ctx.message.text && ctx.message.text.trim();
     if (!text) {
-      await ctx.reply("Iltimos, ism va familiyangizni matn ko'rinishida yuboring.");
+      await ctx.reply("Iltimos, familiyangizni matn ko'rinishida yuboring.");
       return;
     }
-    ctx.wizard.state.data.fullName = text;
+    ctx.wizard.state.data.familiya = text;
+    await ctx.reply('Ismingizni kiriting (masalan: Aziz):');
+    return ctx.wizard.next();
+  },
+
+  // 3: ism -> fakultet so'rash
+  async (ctx) => {
+    const text = ctx.message && ctx.message.text && ctx.message.text.trim();
+    if (!text) {
+      await ctx.reply("Iltimos, ismingizni matn ko'rinishida yuboring.");
+      return;
+    }
+    ctx.wizard.state.data.ism = text;
+    ctx.wizard.state.data.fullName = `${ctx.wizard.state.data.familiya} ${text}`;
     await ctx.reply('Fakultetingizni kiriting:');
     return ctx.wizard.next();
   },
 
-  // 3: fakultet -> yo'nalish so'rash
+  // 4: fakultet -> yo'nalish so'rash
   async (ctx) => {
     const text = ctx.message && ctx.message.text && ctx.message.text.trim();
     if (!text) {
@@ -58,7 +71,7 @@ const registerScene = new Scenes.WizardScene(
     return ctx.wizard.next();
   },
 
-  // 4: yo'nalish -> guruh so'rash
+  // 5: yo'nalish -> guruh so'rash
   async (ctx) => {
     const text = ctx.message && ctx.message.text && ctx.message.text.trim();
     if (!text) {
@@ -70,7 +83,7 @@ const registerScene = new Scenes.WizardScene(
     return ctx.wizard.next();
   },
 
-  // 5: guruh -> rasm so'rash
+  // 6: guruh -> rasm so'rash
   async (ctx) => {
     const text = ctx.message && ctx.message.text && ctx.message.text.trim();
     if (!text) {
@@ -82,7 +95,7 @@ const registerScene = new Scenes.WizardScene(
     return ctx.wizard.next();
   },
 
-  // 6: rasm -> tasdiqlash uchun xulosa
+  // 7: rasm -> tasdiqlash uchun xulosa
   async (ctx) => {
     const photos = ctx.message && ctx.message.photo;
     if (!photos || !photos.length) {
@@ -108,7 +121,7 @@ const registerScene = new Scenes.WizardScene(
     return ctx.wizard.next();
   },
 
-  // 7: tugmani kutish
+  // 8: tugmani kutish
   async (ctx) => {
     await ctx.reply('Iltimos, yuqoridagi tugmalardan birini bosing.');
   }

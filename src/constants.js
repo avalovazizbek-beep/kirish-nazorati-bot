@@ -9,4 +9,13 @@ const REQUEST_TYPE = {
   RESET: 'Parolni tiklash',
 };
 
-module.exports = { STATUS, REQUEST_TYPE };
+const KERIO_STATUS = {
+  PENDING: 'PENDING',
+  CREATING: 'CREATING',
+  CREATED: 'CREATED',
+  SENT: 'SENT',
+  ERROR: 'ERROR',
+  DRY_RUN: 'DRY_RUN',
+};
+
+module.exports = { STATUS, REQUEST_TYPE, KERIO_STATUS };

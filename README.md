@@ -6,14 +6,15 @@ esa (jadvalda ham ko'rinishi uchun) admin akkauntining shaxsiy Google Drive'iga 
 
 ## Imkoniyatlar
 
-- **Ro'yxatdan o'tish**: telefon → ism familiya → fakultet → yo'nalish → guruh → passport rasmi →
-  tasdiqlash → admin javobi (login/parol) foydalanuvchiga yuboriladi.
+- **Ro'yxatdan o'tish**: telefon → familiya → ism → fakultet → yo'nalish → guruh → passport rasmi →
+  tasdiqlash → admin "✅ Tasdiqlash" bosgach, Kerio Control'da hisob avtomatik yaratiladi va
+  login/parol foydalanuvchiga yuboriladi (qarang: "Kerio Control integratsiyasi").
 - **Login/Parolni tiklash**: ism familiya → passport rasmi → tasdiqlash → admin javobi (yangi
-  login/parol) foydalanuvchiga yuboriladi.
+  login/parol, hozircha qo'lda kiritiladi) foydalanuvchiga yuboriladi.
 - **Adminga murojaat**: foydalanuvchi va admin bot orqali bevosita yozishishi mumkin (matn, rasm va
   boshqa turdagi xabarlar).
-- Admin arizani "✅ Tasdiqlash" tugmasi orqali login/parol yozib tasdiqlaydi yoki "❌ Rad etish" orqali
-  sababi bilan rad etadi.
+- Admin arizani "✅ Tasdiqlash" tugmasi orqali tasdiqlaydi yoki "❌ Rad etish" orqali sababi bilan
+  rad etadi.
 - `/pending` - adminlar uchun kutilayotgan barcha arizalar ro'yxati.
 
 ## O'rnatish
@@ -76,7 +77,39 @@ uchun bir martalik ulash (OAuth) kerak:
 
 Shundan so'ng yangi arizalardagi pasport rasmi ham jadvalning "Rasm" ustunida ko'rinadi.
 
-### 5. Ishga tushirish
+### 5. Kerio Control integratsiyasi
+
+Admin "✅ Tasdiqlash" tugmasini bosgach, **ro'yxatdan o'tish** arizalari uchun Kerio Control'da
+foydalanuvchi avtomatik yaratiladi (login/parolni endi admin qo'lda kiritmaydi). Parolni tiklash
+so'rovlari hozircha eski tartibda (admin login/parolni qo'lda yozadi) qoladi.
+
+1. `.env` fayliga quyidagilarni to'ldiring:
+   ```
+   KERIO_URL=https://<kerio-server>:4081
+   KERIO_API_PATH=/admin/api/jsonrpc/
+   KERIO_USERNAME=<API uchun alohida Kerio admin hisobi>
+   KERIO_PASSWORD=<shu hisobning paroli>
+   KERIO_APPLICATION_NAME=Telegram Bot
+   KERIO_APPLICATION_VENDOR=SIES
+   KERIO_APPLICATION_VERSION=1.0
+   KERIO_ALLOW_SELF_SIGNED=true
+   KERIO_DRY_RUN=true
+   KERIO_STUDENT_GROUP_NAME=Студенты
+   ```
+2. `KERIO_DRY_RUN=true` bo'lganda real user yaratilmaydi - faqat yuboriladigan so'rov adminga
+   Telegram orqali ko'rsatiladi va Google Sheets'da `KerioStatus=DRY_RUN` qilib belgilanadi.
+   Ishonch hosil qilgach `KERIO_DRY_RUN=false` qiling.
+3. Login formati mavjud Kerio bazasidagi konvensiyaga mos: `familiya_ismning-birinchi-harfi_tg`
+   (masalan "Avalov Azizbek" -> `avalov_a_tg`). Band bo'lsa oxiriga raqam qo'shiladi.
+   Parol - 6 ta random harf.
+4. Google Sheets'ga avtomatik quyidagi ustunlar qo'shiladi (mavjud ustunlarga tegilmaydi):
+   `KerioStatus`, `KerioUsername`, `KerioPassword`, `KerioUserId`, `KerioError`, `KerioCreatedAt`.
+5. `KerioStatus = CREATED` yoki `SENT` bo'lgan foydalanuvchi uchun ikkinchi marta Kerio user
+   yaratilmaydi (duplicate himoyasi).
+6. Diagnostika: `node scripts/kerioDiagnose.js` - Kerio API bilan bog'lanishni va real maydon
+   nomlarini tekshiradigan, hech narsa yozmaydigan (faqat o'qish) skript.
+
+### 6. Ishga tushirish
 
 ```bash
 npm start
@@ -98,5 +131,6 @@ npm run dev
   qayta ishga tushirilganda ham yo'qolmaydi. Bu fayl `.env` kabi maxfiy emas, lekin `.gitignore`
   ro'yxatida.
 - `ADMIN_IDS` ga kiritilmagan foydalanuvchilar admin buyruqlari va tugmalaridan foydalana olmaydi.
-- Login/parolni admin qo'lda kiritadi - bular tashqi tizim (masalan universitet portali) uchun
-  hisob ma'lumotlari bo'lgani sabab, botda alohida shifrlanmaydi, faqat Google Sheets orqali saqlanadi.
+- Ro'yxatdan o'tish uchun login/parol Kerio Control orqali avtomatik yaratiladi (yuqoridagi "Kerio
+  Control integratsiyasi" bo'limiga qarang). Parolni tiklash so'rovlarida esa hozircha admin
+  login/parolni qo'lda kiritadi - bular Google Sheets orqali saqlanadi, alohida shifrlanmaydi.

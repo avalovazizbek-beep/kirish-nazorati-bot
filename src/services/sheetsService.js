@@ -26,6 +26,12 @@ const HEADER_MAP = {
   createdAt: 'Yaratilgan sana',
   updatedAt: 'Yangilangan sana',
   photoUrl: 'Rasm manzili',
+  kerioStatus: 'KerioStatus',
+  kerioUsername: 'KerioUsername',
+  kerioPassword: 'KerioPassword',
+  kerioUserId: 'KerioUserId',
+  kerioError: 'KerioError',
+  kerioCreatedAt: 'KerioCreatedAt',
 };
 
 const HEADERS = Object.values(HEADER_MAP);
@@ -112,6 +118,12 @@ async function addApplication(data) {
     createdAt: now,
     updatedAt: now,
     photoUrl: data.photoUrl || '',
+    kerioStatus: '',
+    kerioUsername: '',
+    kerioPassword: '',
+    kerioUserId: '',
+    kerioError: '',
+    kerioCreatedAt: '',
   };
   const row = {};
   for (const [key, header] of Object.entries(HEADER_MAP)) {
@@ -152,6 +164,11 @@ async function updateApplication(id, fields) {
   return rowToObject(row);
 }
 
+async function getApplication(id) {
+  const row = await findRowById(id);
+  return row ? rowToObject(row) : null;
+}
+
 async function getPendingApplications() {
   const sheet = await getSheet();
   const rows = await sheet.getRows();
@@ -161,5 +178,6 @@ async function getPendingApplications() {
 module.exports = {
   addApplication,
   updateApplication,
+  getApplication,
   getPendingApplications,
 };
