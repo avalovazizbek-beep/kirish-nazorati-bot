@@ -24,6 +24,8 @@ function buildAgent() {
   return new https.Agent({ rejectUnauthorized: !config.kerioAllowSelfSigned });
 }
 
+const REQUEST_TIMEOUT_MS = 15000;
+
 function rawRequest(path, bodyObj, extraHeaders) {
   const target = new URL(config.kerioUrl);
   const body = JSON.stringify(bodyObj);
@@ -33,6 +35,7 @@ function rawRequest(path, bodyObj, extraHeaders) {
     path,
     method: 'POST',
     agent: buildAgent(),
+    timeout: REQUEST_TIMEOUT_MS,
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(body),
@@ -51,6 +54,9 @@ function rawRequest(path, bodyObj, extraHeaders) {
           reject(new Error(`Kerio javobini o'qib bo'lmadi: ${err.message}`));
         }
       });
+    });
+    req.on('timeout', () => {
+      req.destroy(new Error(`Kerio'ga so'rov ${REQUEST_TIMEOUT_MS}ms ichida javob bermadi (timeout).`));
     });
     req.on('error', reject);
     req.write(body);
